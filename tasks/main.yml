@@ -36,7 +36,7 @@
     when: ansible_os_family == 'RedHat'
 
   - name: "Check if reboot is required, after patching kernel (Debian)"
-    shell: LAST_KERNEL=$(dpkg-query --list | grep linux-image-* | grep ii | awk '{ sub(/linux-image-/,""); print $2 }' | sort --reverse | tail -n+2 | head -n 1); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
+    shell: LAST_KERNEL=$(dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+' | grep ii | awk '{ sub(/linux-image-/,""); print $2 }' | sort | tail -n 1); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
     register: reboot
     notify: "Reboot host, if kernel update installed"
     when: ansible_os_family == 'Debian'
