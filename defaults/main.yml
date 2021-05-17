@@ -1,2 +1,5 @@
 ---
-# defaults file for ansible-role-linux-updates/
+smtp_host: "smtp.example.org"
+smtp_port: 25
+recipient: "it@example.org"
+sender: "myhost@example.org"

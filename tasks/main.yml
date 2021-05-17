@@ -1,2 +1,56 @@
 ---
-# tasks file for ansible-role-linux-updates/
+  - name: Include OS-specific variables.
+    include_vars: "{{ lookup('first_found', params) }}"
+    vars:
+      params:
+        files:
+          - "{{ansible_os_family}}_{{ ansible_distribution_major_version }}.yaml"
+          - "{{ansible_distribution}}.yaml"
+          - "{{ansible_os_family}}.yaml"
+          - default.yaml
+        paths:
+          - "vars"
+
+  - name: "Gather the package facts"
+    ansible.builtin.package_facts:
+      manager: auto
+    when: ansible_facts.packages is not defined
+
+  - name: "Install yum-utils package, if not already installed"
+    ansible.builtin.package:
+      name: "yum-utils"
+      state: latest
+    when: '"yum-utils" not in ansible_facts.packages'
+
+  - name: "Install latest kernel updates"
+    ansible.builtin.package:
+      name: "kernel"
+      state: latest
+      #update_cache: yes
+
+  - name: "Check if reboot is required, after patching kernel"
+    shell: LAST_KERNEL=$(rpm -q --last kernel | awk 'NR==1{sub(/kernel-/,""); print $1}'); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
+    #ignore_errors: true
+    register: reboot
+    notify: "Reboot host, if kernel update installed"
+
+  - name: "Install latest updates for all other installed packages"
+    ansible.builtin.package:
+      name: "*"
+      state: latest
+      #update_cache: yes
+
+  - name: "Collect list of installed packages"
+    shell: "{{ patching_journal }}"
+    register: notes
+
+  - name: "Email notification of installed packages"
+    mail:
+      host: "{{ smtp_host }}"
+      port: "{{ smtp_port }}"
+      to: "{{ recipient }}"
+      from: "{{ sender }}"
+      subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
+      body: "{{ notes.stdout }}"
+      secure: never
+    delegate_to: localhost
