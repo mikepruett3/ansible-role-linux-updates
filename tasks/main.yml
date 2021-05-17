@@ -66,6 +66,6 @@
     ignore_errors: yes
     when: ansible_os_family == 'RedHat'
 
-  - name: "Cleanup (autoremove) old packages (RHEL)"
+  - name: "Cleanup (autoremove) old packages"
     ansible.builtin.package:
       autoremove: yes
