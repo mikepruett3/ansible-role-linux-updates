@@ -58,5 +58,5 @@
       secure: never
     delegate_to: localhost
     when:
-      - not notes.stdout.stdout.find("-- No entries --") != -1
+      - notes.stdout.stdout.find("-- No entries --") == -1
       - notes.stdout != ""
