@@ -30,14 +30,14 @@
         ansible.builtin.package:
           name: "kernel"
           state: latest
-          update_cache: no
+          update_cache: yes
           update_only: yes
         when: ansible_os_family == 'RedHat'
       - name: "Install latest kernel updates (Debian)"
         ansible.builtin.package:
           name: "dist"
           state: latest
-          update_cache: no
+          update_cache: yes
           #only_upgrade: yes
         when: ansible_os_family == 'Debian'
 
