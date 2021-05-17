@@ -39,7 +39,7 @@
     ansible.builtin.package:
       name: "*"
       state: latest
-      security: yes
+      #security: yes
       update_cache: no
       #update_only: yes
 
