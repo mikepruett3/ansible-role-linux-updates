@@ -19,14 +19,15 @@
   - name: "Install yum-utils package, if not already installed"
     ansible.builtin.package:
       name: "yum-utils"
-      state: latest
+      state: present
     when: '"yum-utils" not in ansible_facts.packages'
 
   - name: "Install latest kernel updates"
     ansible.builtin.package:
       name: "kernel"
       state: latest
-      #update_cache: yes
+      update_cache: no
+      update_only: yes
 
   - name: "Check if reboot is required, after patching kernel"
     shell: LAST_KERNEL=$(rpm -q --last kernel | awk 'NR==1{sub(/kernel-/,""); print $1}'); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
@@ -38,7 +39,9 @@
     ansible.builtin.package:
       name: "*"
       state: latest
-      #update_cache: yes
+      security: yes
+      update_cache: no
+      update_only: yes
 
   - name: "Collect list of installed packages"
     shell: "{{ patching_journal }}"
