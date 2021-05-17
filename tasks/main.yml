@@ -44,12 +44,12 @@
   - name: "Check if reboot is required"
     block:
       - name: "Deploy kernel_check.sh script"
-        template:
+        ansible.builtin.template:
           src: "{{ kernel_check_script }}"
           dest: /usr/local/bin/kernel_check.sh
           owner: root
           group: root
-          mode: 0777
+          mode: '0777'
       - name: "Check if reboot is required, after patching kernel"
         #shell: LAST_KERNEL=$(rpm -q --last kernel | awk 'NR==1{sub(/kernel-/,""); print $1}'); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
         command: /usr/local/bin/kernel_check.sh
