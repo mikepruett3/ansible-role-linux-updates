@@ -12,18 +12,18 @@
           - "vars"
 
   - name: "Gather the package facts"
-    package_facts:
+    ansible.builtin.package_facts:
       manager: auto
     when: ansible_facts.packages is not defined
 
   - name: "Install yum-utils package, if not already installed"
-    package:
+    ansible.builtin.package:
       name: "yum-utils"
       state: latest
     when: '"yum-utils" not in ansible_facts.packages'
 
   - name: "Install latest kernel updates"
-    package:
+    ansible.builtin.package:
       name: "kernel"
       state: latest
       #update_cache: yes
@@ -35,7 +35,7 @@
     notify: "Reboot host, if kernel update installed"
 
   - name: "Install latest updates for all other installed packages"
-    package:
+    ansible.builtin.package:
       name: "*"
       state: latest
       #update_cache: yes
