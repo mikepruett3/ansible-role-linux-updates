@@ -61,11 +61,6 @@
       - notes.stdout.find("-- No entries --") == -1
       - notes.stdout != ""
 
-  - name: "Remove/Cleanup old installed kernels"
-    block:
-      - name: "Remove old kernels after reboot (RHEL7)"
-        command: package-cleanup -y --oldkernels --count=1
-        when: ansible_os_family == 'RedHat' and {{ ansible_distribution_major_version }} <= 7
-      - name: "Remove old kernels after reboot (RHEL8+)"
-        command: dnf remove --oldinstallonly --setopt installonly_limit=1 kernel
-        when: ansible_os_family == 'RedHat' and {{ ansible_distribution_major_version }} >= 8
+  - name: "Remove old kernels after reboot (RHEL)"
+    command: "{{ package_cleanup }}"
+    when: ansible_os_family == 'RedHat'

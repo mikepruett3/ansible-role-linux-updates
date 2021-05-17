@@ -1,2 +1,3 @@
 ---
 patching_journal: "rpm -qa --last | grep {{ lookup('pipe','date +\"%a %d %b %Y\"') | quote }} | awk '{ print $1 }'"
+package_cleanup: "package-cleanup -y --oldkernels --count=1"
