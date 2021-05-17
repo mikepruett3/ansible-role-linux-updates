@@ -20,7 +20,9 @@
     ansible.builtin.package:
       name: "yum-utils"
       state: present
-    when: '"yum-utils" not in ansible_facts.packages'
+    when:
+      - '"yum-utils" not in ansible_facts.packages'
+      - ansible_os_family == 'RedHat'
 
   - name: "Install latest kernel updates"
     ansible.builtin.package:
