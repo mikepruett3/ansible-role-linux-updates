@@ -35,7 +35,7 @@
         when: ansible_os_family == 'RedHat'
       - name: "Install latest kernel updates (Debian)"
         ansible.builtin.package:
-          name: "kernel"
+          name: "linux-image"
           state: latest
           update_cache: no
           only_upgrade: yes
