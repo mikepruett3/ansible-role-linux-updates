@@ -1,3 +1,3 @@
 ---
 #patching_journal: "journalctl -b -t 'yum'"
-patching_journal: "rpm -qa --last | grep "Tue 04 May 2021" | awk '{ print $1 }'"
+patching_journal: "rpm -qa --last | grep "$(date +"%a %d %b %Y")" | awk '{ print $1 }'"
