@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#{{ ansible_managed | comment }}
+
+LAST_KERNEL=$(dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+' | grep ii | awk '{ sub(/linux-image-/,""); print $2 }' | sort | tail -n 1)
+CURRENT_KERNEL=$(uname -r)
+
+if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then
+    echo 'reboot'
+else
+    echo 'no'
+fi
