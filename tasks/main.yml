@@ -27,7 +27,7 @@
       name: "kernel"
       state: latest
       update_cache: no
-      update_only: yes
+      #update_only: yes
 
   - name: "Check if reboot is required, after patching kernel"
     shell: LAST_KERNEL=$(rpm -q --last kernel | awk 'NR==1{sub(/kernel-/,""); print $1}'); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
@@ -41,7 +41,7 @@
       state: latest
       security: yes
       update_cache: no
-      update_only: yes
+      #update_only: yes
 
   - name: "Collect list of installed packages"
     shell: "{{ patching_journal }}"
