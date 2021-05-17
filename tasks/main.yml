@@ -63,6 +63,7 @@
 
   - name: "Remove old kernels after reboot (RHEL)"
     command: "{{ package_cleanup }}"
+    ignore_errors: yes
     when: ansible_os_family == 'RedHat'
 
   - name: "Cleanup (autoremove) old packages (RHEL)"
