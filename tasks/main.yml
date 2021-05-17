@@ -60,3 +60,7 @@
     when:
       - notes.stdout.find("-- No entries --") == -1
       - notes.stdout != ""
+
+  - name: "Remove old kernels after reboot (RHEL)"
+    command: package-cleanup -y --oldkernels --count=1
+    when: ansible_os_family == 'RedHat'
