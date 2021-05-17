@@ -1,3 +1,4 @@
 ---
 patching_journal: "yum history info $(yum history list | awk '{ print $1 }' | head -n 5 | tail -n 1)"
 package_cleanup: "package-cleanup -y --oldkernels --count=1"
+kernel_check_script: "kernel_check_rhel.j2"
