@@ -1,2 +1,2 @@
 ---
-patching_journal: "journalctl -t 'apt'"
+patching_journal: "journalctl -b -t 'apt'"

@@ -1,2 +1,0 @@
----
-patching_journal: "yum history info $(yum history list | awk '{ print $1 }' | head -n 5 | tail -n 1)"
