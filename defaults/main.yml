@@ -1,5 +1,5 @@
 ---
 smtp_host: "smtp.example.org"
 smtp_port: 25
-recipient: "it@example.org"
 sender: "myhost@example.org"
+recipient: "it@example.org"
