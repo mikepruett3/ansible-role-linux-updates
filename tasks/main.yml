@@ -38,7 +38,7 @@
           name: "dist"
           state: latest
           update_cache: no
-          only_upgrade: yes
+          #only_upgrade: yes
         when: ansible_os_family == 'Debian'
 
   - name: "Check if reboot is required"
