@@ -40,7 +40,7 @@
       name: "*"
       state: latest
       #security: yes
-      update_cache: no
+      #update_cache: no
       #update_only: yes
 
   - name: "Collect list of installed packages"
