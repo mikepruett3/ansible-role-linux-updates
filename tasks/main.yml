@@ -57,4 +57,6 @@
       body: "{{ notes.stdout }}"
       secure: never
     delegate_to: localhost
-    when: notes.stdout != ""
+    when:
+      - notes.stdout != "-- No entries --"
+      - notes.stdout != ""
