@@ -99,10 +99,16 @@
       - notes.stdout.find("-- No entries --") == -1
       - notes.stdout != ""
 
+  - name: "Collect number of installed kernels"
+    shell: rpm -qa kernel | wc -l
+    register: kernels
+
   - name: "Remove old kernels after reboot (RHEL)"
     command: "{{ package_cleanup }}"
     ignore_errors: yes
-    when: ansible_os_family == 'RedHat'
+    when:
+      - kernels.stdout ge 2
+      - ansible_os_family == 'RedHat'
 
   - name: "Cleanup (autoremove) old packages"
     ansible.builtin.package:
