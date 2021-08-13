@@ -107,7 +107,7 @@
     command: "{{ package_cleanup }}"
     ignore_errors: yes
     when:
-      - kernels.stdout >= 2
+      - kernels.stdout | int >= 2
       - ansible_os_family == 'RedHat'
 
   - name: "Cleanup (autoremove) old packages"
