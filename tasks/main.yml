@@ -24,20 +24,39 @@
       - '"yum-utils" not in ansible_facts.packages'
       - ansible_os_family == 'RedHat'
 
-  - name: "Install latest kernel updates"
+  #- name: "Install latest kernel updates"
+  #  block:
+  #    - name: "Install latest kernel updates (RHEL)"
+  #      ansible.builtin.package:
+  #        name: "kernel"
+  #        state: latest
+  #        update_cache: yes
+  #        update_only: yes
+  #      when: ansible_os_family == 'RedHat'
+  #    - name: "Install latest kernel updates (Debian)"
+  #      ansible.builtin.package:
+  #        name: "dist"
+  #        state: latest
+  #        update_cache: yes
+  #        #only_upgrade: yes
+  #      when: ansible_os_family == 'Debian'
+
+  - name: "Install latest updates"
     block:
-      - name: "Install latest kernel updates (RHEL)"
+      - name: "Install latest updates (RHEL)"
         ansible.builtin.package:
-          name: "kernel"
+          name: "*"
           state: latest
+          #security: yes
           update_cache: yes
-          update_only: yes
+          #update_only: yes
         when: ansible_os_family == 'RedHat'
-      - name: "Install latest kernel updates (Debian)"
+      - name: "Install latest updates (Debian)"
         ansible.builtin.package:
-          name: "dist"
+          name: "*"
           state: latest
           update_cache: yes
+          autoremove: yes
           #only_upgrade: yes
         when: ansible_os_family == 'Debian'
 
@@ -61,24 +80,6 @@
       #  register: reboot
       #  notify: "Reboot host, if kernel update installed"
       #  when: ansible_os_family == 'Debian'
-
-  - name: "Install latest updates for all other installed packages"
-    block:
-      - name: "Install latest updates for all other installed packages (RHEL)"
-        ansible.builtin.package:
-          name: "*"
-          state: latest
-          security: yes
-          update_cache: no
-          update_only: yes
-        when: ansible_os_family == 'RedHat'
-      - name: "Install latest updates for all other installed packages (Debian)"
-        ansible.builtin.package:
-          name: "*"
-          state: latest
-          update_cache: no
-          only_upgrade: yes
-        when: ansible_os_family == 'Debian'
 
   - name: "Collect list of installed packages"
     shell: "{{ patching_journal }}"
@@ -106,3 +107,4 @@
   - name: "Cleanup (autoremove) old packages"
     ansible.builtin.package:
       autoremove: yes
+    when: ansible_os_family == 'RedHat'
