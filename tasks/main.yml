@@ -53,7 +53,10 @@
       - name: "Check if reboot is required, after patching kernel"
         command: /usr/local/bin/kernel_check.sh
         register: reboot
-        notify: "Reboot host, if kernel update installed"
+        #notify: "Reboot host, if kernel update installed"
+      - name: "Reboot host, if kernel update installed"
+        ansible.builtin.reboot:
+        when: reboot.stdout.find("reboot") != -1
 
   - name: "Collect list of installed packages"
     shell: "{{ patching_journal }}"
