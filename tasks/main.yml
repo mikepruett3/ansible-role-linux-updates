@@ -30,6 +30,7 @@
         ansible.builtin.package:
           name: "*"
           state: latest
+          allowerasing: yes
           update_cache: yes
         when: ansible_os_family == 'RedHat'
       - name: "Install latest updates (Debian)"
