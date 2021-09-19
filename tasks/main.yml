@@ -44,7 +44,7 @@
           name: "*"
           state: latest
           update_cache: yes
-          #autoremove: yes
+          autoremove: yes
         when: ansible_os_family == 'Debian'
 
   - name: "Check if reboot is required"
