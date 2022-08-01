@@ -55,7 +55,7 @@
           dest: /usr/local/bin/kernel_check.sh
           owner: root
           group: root
-          mode: '0777'
+          mode: '0770'
       - name: "Check if reboot is required, after patching kernel"
         command: /usr/local/bin/kernel_check.sh
         register: reboot
