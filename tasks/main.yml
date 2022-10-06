@@ -1,101 +1,103 @@
 ---
-  - name: Include OS-specific variables.
-    include_vars: "{{ lookup('first_found', params) }}"
-    vars:
-      params:
-        files:
-          - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yaml"
-          - "{{ ansible_distribution }}.yaml"
-          - "{{ ansible_os_family }}.yaml"
-          - default.yaml
-        paths:
-          - "vars"
+# tasks file for ansible-role-linux-updates
 
-  - name: "Gather the package facts"
-    ansible.builtin.package_facts:
-      manager: auto
-    when: ansible_facts.packages is not defined
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yaml"
+        - "{{ ansible_distribution }}.yaml"
+        - "{{ ansible_os_family }}.yaml"
+        - default.yaml
+      paths:
+        - "vars"
 
-  - name: "Install yum-utils package, if not already installed"
-    ansible.builtin.package:
-      name: "yum-utils"
-      state: present
-    when:
-      - '"yum-utils" not in ansible_facts.packages'
-      - ansible_os_family == 'RedHat'
+- name: "Gather the package facts"
+  ansible.builtin.package_facts:
+    manager: auto
+  when: ansible_facts.packages is not defined
 
-  - name: "Install latest updates"
-    block:
-      - name: "Install latest updates (RHEL7)"
-        ansible.builtin.package:
-          name: "*"
-          state: latest
-          update_cache: yes
-        when: ansible_os_family == 'RedHat' and ansible_distribution_major_version <= '7'
-      - name: "Install latest updates (RHEL8)"
-        ansible.builtin.dnf:
-          name: "*"
-          state: latest
-          allowerasing: yes
-          update_cache: yes
-        when: ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8'
-      - name: "Install latest updates (Debian)"
-        ansible.builtin.package:
-          name: "*"
-          state: latest
-          update_cache: yes
-          autoremove: yes
-        when: ansible_os_family == 'Debian'
+- name: "Install yum-utils package, if not already installed"
+  ansible.builtin.package:
+    name: "yum-utils"
+    state: present
+  when:
+    - '"yum-utils" not in ansible_facts.packages'
+    - ansible_os_family == 'RedHat'
 
-  - name: "Check if reboot is required"
-    block:
-      - name: "Deploy kernel_check.sh script"
-        ansible.builtin.template:
-          src: "{{ kernel_check_script }}"
-          dest: /usr/local/bin/kernel_check.sh
-          owner: root
-          group: root
-          mode: '0770'
-      - name: "Check if reboot is required, after patching kernel"
-        command: /usr/local/bin/kernel_check.sh
-        register: reboot
-        #notify: "Reboot host, if kernel update installed"
-      - name: "Reboot host, if kernel update installed"
-        ansible.builtin.reboot:
-        when: reboot.stdout.find("reboot") != -1
+- name: "Install latest updates"
+  block:
+    - name: "Install latest updates (RHEL7)"
+      ansible.builtin.package:
+        name: "*"
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version <= '7'
+    - name: "Install latest updates (RHEL8)"
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        allowerasing: yes
+        update_cache: yes
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8'
+    - name: "Install latest updates (Debian)"
+      ansible.builtin.package:
+        name: "*"
+        state: latest
+        update_cache: yes
+        autoremove: yes
+      when: ansible_os_family == 'Debian'
 
-  - name: "Collect list of installed packages"
-    shell: "{{ patching_journal }}"
-    register: notes
+- name: "Check if reboot is required"
+  block:
+    - name: "Deploy kernel_check.sh script"
+      ansible.builtin.template:
+        src: "{{ kernel_check_script }}"
+        dest: /usr/local/bin/kernel_check.sh
+        owner: root
+        group: root
+        mode: '0770'
+    - name: "Check if reboot is required, after patching kernel"
+      command: /usr/local/bin/kernel_check.sh
+      register: reboot
+      #notify: "Reboot host, if kernel update installed"
+    - name: "Reboot host, if kernel update installed"
+      ansible.builtin.reboot:
+      when: reboot.stdout.find("reboot") != -1
 
-  - name: "Email notification of installed packages"
-    mail:
-      host: "{{ smtp_host }}"
-      port: "{{ smtp_port }}"
-      to: "{{ recipient }}"
-      from: "{{ sender }}"
-      subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
-      body: "{{ notes.stdout }}"
-      secure: never
-    delegate_to: localhost
-    when:
-      - notes.stdout.find("-- No entries --") == -1
-      - notes.stdout != ""
+- name: "Collect list of installed packages"
+  shell: "{{ patching_journal }}"
+  register: notes
 
-  - name: "Collect number of installed kernels"
-    shell: rpm -qa kernel | wc -l
-    register: kernels
+- name: "Email notification of installed packages"
+  mail:
+    host: "{{ smtp_host }}"
+    port: "{{ smtp_port }}"
+    to: "{{ recipient }}"
+    from: "{{ sender }}"
+    subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
+    body: "{{ notes.stdout }}"
+    secure: never
+  delegate_to: localhost
+  when:
+    - notes.stdout.find("-- No entries --") == -1
+    - notes.stdout != ""
 
-  - name: "Remove old kernels after reboot (RHEL)"
-    command: "{{ package_cleanup }}"
-    ignore_errors: yes
-    when:
-      - kernels.stdout | int > 2
-      - ansible_os_family == 'RedHat'
+- name: "Collect number of installed kernels"
+  shell: rpm -qa kernel | wc -l
+  register: kernels
 
-  - name: "Cleanup (autoremove) old packages"
-    ansible.builtin.package:
-      autoremove: yes
-    when:
-      - ansible_os_family == 'RedHat'
-      - ansible_distribution_major_version >= '7'
+- name: "Remove old kernels after reboot (RHEL)"
+  command: "{{ package_cleanup }}"
+  ignore_errors: yes
+  when:
+    - kernels.stdout | int > 2
+    - ansible_os_family == 'RedHat'
+
+- name: "Cleanup (autoremove) old packages"
+  ansible.builtin.package:
+    autoremove: yes
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version >= '7'

@@ -1,0 +1,4 @@
+---
+patching_journal: "dnf history info"
+package_cleanup: "dnf -y remove --oldinstallonly --setopt installonly_limit=2 kernel"
+kernel_check_script: "kernel_check_rhel.j2"
