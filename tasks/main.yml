@@ -1,17 +1,17 @@
 ---
 # tasks file for ansible-role-linux-updates
 
-- name: Include OS-specific variables.
-  include_vars: "{{ lookup('first_found', params) }}"
+- name: "Include OS-specific variables"
+  ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', params) }}"
   vars:
     params:
       files:
-        - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yaml"
-        - "{{ ansible_distribution }}.yaml"
-        - "{{ ansible_os_family }}.yaml"
+        - '{{ansible_distribution}}_{{ansible_distribution_major_version}}.yaml'
+        - '{{ansible_distribution}}.yaml'
+        - '{{ansible_os_family}}.yaml'
         - default.yaml
       paths:
-        - "vars"
+        - 'vars'
 
 - name: "Gather the package facts"
   ansible.builtin.package_facts:
@@ -24,30 +24,34 @@
     state: present
   when:
     - '"yum-utils" not in ansible_facts.packages'
-    - ansible_os_family == 'RedHat'
+    - ansible_facts['os_family'] == 'RedHat'
 
-- name: "Install latest updates"
-  block:
-    - name: "Install latest updates (RHEL7)"
-      ansible.builtin.package:
-        name: "*"
-        state: latest
-        update_cache: yes
-      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version <= '7'
-    - name: "Install latest updates (RHEL8)"
-      ansible.builtin.dnf:
-        name: "*"
-        state: latest
-        allowerasing: yes
-        update_cache: yes
-      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8'
-    - name: "Install latest updates (Debian)"
-      ansible.builtin.package:
-        name: "*"
-        state: latest
-        update_cache: yes
-        autoremove: yes
-      when: ansible_os_family == 'Debian'
+- name: "Install latest updates (RHEL7)"
+  ansible.builtin.yum:
+    name: "*"
+    state: latest
+    update_cache: yes
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] <= '7'
+
+- name: "Install latest updates (RHEL8)"
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+    allowerasing: yes
+    update_cache: yes
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] >= '8'
+
+- name: "Install latest updates (Debian)"
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+    autoremove: yes
+  when: ansible_facts['os_family'] == 'Debian'
 
 - name: "Check if reboot is required"
   block:
@@ -93,11 +97,11 @@
   ignore_errors: yes
   when:
     - kernels.stdout | int > 2
-    - ansible_os_family == 'RedHat'
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: "Cleanup (autoremove) old packages"
   ansible.builtin.package:
     autoremove: yes
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version >= '7'
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] >= '7'
