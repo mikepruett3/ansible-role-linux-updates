@@ -45,30 +45,32 @@
     - ansible_facts['os_family'] == 'RedHat'
     - ansible_facts['distribution_major_version'] >= '8'
 
+- name: "Update Package List (Debian)"
+  ansible.builtin.apt:
+    update_cache: yes
+  when: ansible_facts['os_family'] == 'Debian'
+
 - name: "Install latest updates (Debian)"
   ansible.builtin.apt:
     name: "*"
     state: latest
-    update_cache: yes
-    autoremove: yes
   when: ansible_facts['os_family'] == 'Debian'
 
-- name: "Check if reboot is required"
-  block:
-    - name: "Deploy kernel_check.sh script"
-      ansible.builtin.template:
-        src: "{{ kernel_check_script }}"
-        dest: /usr/local/bin/kernel_check.sh
-        owner: root
-        group: root
-        mode: '0770'
-    - name: "Check if reboot is required, after patching kernel"
-      command: /usr/local/bin/kernel_check.sh
-      register: reboot
-      #notify: "Reboot host, if kernel update installed"
-    - name: "Reboot host, if kernel update installed"
-      ansible.builtin.reboot:
-      when: reboot.stdout.find("reboot") != -1
+- name: "Deploy kernel_check.sh script"
+  ansible.builtin.template:
+    src: "{{ kernel_check_script }}"
+    dest: /usr/local/bin/kernel_check.sh
+    owner: root
+    group: root
+    mode: '0770'
+
+- name: "Check if reboot is required, after patching kernel"
+  ansible.builtin.command: /usr/local/bin/kernel_check.sh
+  register: reboot
+
+- name: "Reboot host, if kernel update installed"
+  ansible.builtin.reboot:
+  when: reboot.stdout.find("reboot") != -1
 
 - name: "Collect list of installed packages"
   shell: "{{ patching_journal }}"
@@ -88,16 +90,16 @@
     - notes.stdout.find("-- No entries --") == -1
     - notes.stdout != ""
 
-- name: "Collect number of installed kernels"
-  shell: rpm -qa kernel | wc -l
-  register: kernels
+#- name: "Collect number of installed kernels"
+#  shell: rpm -qa kernel | wc -l
+#  register: kernels
 
-- name: "Remove old kernels after reboot (RHEL)"
-  command: "{{ package_cleanup }}"
-  ignore_errors: yes
-  when:
-    - kernels.stdout | int > 2
-    - ansible_facts['os_family'] == 'RedHat'
+#- name: "Remove old kernels after reboot (RHEL)"
+#  command: "{{ package_cleanup }}"
+#  ignore_errors: yes
+#  when:
+#    - kernels.stdout | int > 2
+#    - ansible_facts['os_family'] == 'RedHat'
 
 - name: "Cleanup (autoremove) old packages"
   ansible.builtin.package:
@@ -105,3 +107,18 @@
   when:
     - ansible_facts['os_family'] == 'RedHat'
     - ansible_facts['distribution_major_version'] >= '7'
+
+- name: "Remove useless packages from the cache (Debian)"
+  ansible.builtin.apt:
+    autoclean: yes
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: "Remove dependencies that are no longer required (Debian)"
+  ansible.builtin.apt:
+    autoremove: yes
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: "Cleanup Apt Cache (Debian)"
+  ansible.builtin.apt:
+    clean: yes
+  when: ansible_facts['os_family'] == 'Debian'
