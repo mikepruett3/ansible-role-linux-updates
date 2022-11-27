@@ -119,6 +119,5 @@
   when: ansible_facts['os_family'] == 'Debian'
 
 - name: "Cleanup Apt Cache (Debian)"
-  ansible.builtin.apt:
-    clean: true
+  ansible.builtin.shell: apt-get -y clean
   when: ansible_facts['os_family'] == 'Debian'
