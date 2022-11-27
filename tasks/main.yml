@@ -120,5 +120,5 @@
 
 - name: "Cleanup Apt Cache (Debian)"
   ansible.builtin.apt:
-    clean: yes
+    clean: true
   when: ansible_facts['os_family'] == 'Debian'
