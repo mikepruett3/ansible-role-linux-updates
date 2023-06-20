@@ -29,6 +29,9 @@
     - ansible_facts['os_family'] == 'RedHat'
     - ansible_facts['distribution_major_version'] >= '8'
 
+- debug:
+    var: notes
+
 - name: "Email notification of installed packages"
   mail:
     host: "{{ smtp_host }}"
@@ -42,6 +45,3 @@
   when:
     - notes.failed is false
     #- notes.stdout.find("-- No entries --") == -1
-
-- debug:
-    var: notes
