@@ -21,3 +21,6 @@
     package_cleanup: false
   when:
     - result.failed is true
+
+- debug:
+    msg: "{{ ansible_date_time.date }}"
