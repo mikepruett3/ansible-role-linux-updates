@@ -1,0 +1,23 @@
+---
+# Lookup tasks file for ansible-role-linux-updates
+
+- name: "Check for yum-utils package"
+  ansible.builtin.shell:
+    cmd: command -v package-cleanup
+  register: result
+  ignore_errors: true
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+
+- name: "Set Facts for package_cleanup variable, when installed"
+  ansible.builtin.set_fact:
+    package_cleanup: true
+  when:
+    - result.failed is false
+
+- name: "Set Facts for package_cleanup variable, when not installed"
+  ansible.builtin.set_fact:
+    package_cleanup: false
+  when:
+    - result.failed is true
+
