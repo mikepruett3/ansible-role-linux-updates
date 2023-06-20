@@ -1,0 +1,25 @@
+---
+# Kernel tasks file for ansible-role-linux-updates
+
+## https://access.redhat.com/solutions/1227 ##
+
+- name: "Collect number of installed kernels"
+  ansible.builtin.shell:
+    cmd: rpm -qa kernel | wc -l
+  register: kernels
+
+- name: "Remove old kernels (yum-utils)"
+  ansible.builtin.shell:
+    cmd: package-cleanup -y --oldkernels --count=2
+  ignore_errors: yes
+  when:
+    - kernels.stdout | int > 2
+    - ansible_facts['distribution_major_version'] >= '7'
+
+- name: "Remove old kernels (dnf)"
+  ansible.builtin.shell:
+    cmd: dnf -y remove --oldinstallonly --setopt installonly_limit=2 kernel
+  ignore_errors: yes
+  when:
+    - kernels.stdout | int > 2
+    - ansible_facts['distribution_major_version'] <= '8'
