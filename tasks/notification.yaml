@@ -11,20 +11,20 @@
     cmd: grep '^{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-17*' /var/log/dpkg.log | grep 'status installed'
   register: notes
 
-- name: "Email notification of installed packages"
-  ansible.builtin.debug:
-    var: notes
-
 #- name: "Email notification of installed packages"
-#  mail:
-#    host: "{{ smtp_host }}"
-#    port: "{{ smtp_port }}"
-#    to: "{{ recipient }}"
-#    from: "{{ sender }}"
-#    subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
-#    body: "{{ notes.stdout }}"
-#    secure: never
-#  delegate_to: localhost
-#  when:
-#    - notes.stdout.find("-- No entries --") == -1
-#    - notes.stdout != ""
+#  ansible.builtin.debug:
+#    var: notes
+
+- name: "Email notification of installed packages"
+  mail:
+    host: "{{ smtp_host }}"
+    port: "{{ smtp_port }}"
+    to: "{{ recipient }}"
+    from: "{{ sender }}"
+    subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
+    body: "{{ notes.stdout_lines }}"
+    secure: never
+  delegate_to: localhost
+  when:
+    - notes.failed is false
+    - notes.stdout.find("-- No entries --") == -1
