@@ -16,7 +16,6 @@
     state: present
   when:
     - not package_cleanup | bool
-    - ansible_facts['distribution_major_version'] <= '7'
 
 ## https://access.redhat.com/solutions/1227 ##
 - name: "Collect number of installed kernels"
