@@ -14,11 +14,10 @@
   ansible.builtin.set_fact:
     package_cleanup: true
   when:
-    - result.failed is false
+    - result.failed is false or ansible_facts['distribution_major_version'] >= '8'
 
 - name: "Set Facts for package_cleanup variable, when not installed"
   ansible.builtin.set_fact:
     package_cleanup: false
   when:
     - result.failed is true
-
