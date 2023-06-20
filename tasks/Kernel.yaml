@@ -2,7 +2,6 @@
 # Kernel tasks file for ansible-role-linux-updates
 
 ## https://access.redhat.com/solutions/1227 ##
-
 - name: "Collect number of installed kernels"
   ansible.builtin.shell:
     cmd: rpm -qa kernel | wc -l
