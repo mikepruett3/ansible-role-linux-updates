@@ -1,0 +1,29 @@
+---
+# Notification tasks file for ansible-role-linux-updates
+
+#- name: "Collect list of installed packages"
+#  shell: "{{ patching_journal }}"
+#  register: notes
+
+- name: "Collect list of installed packages (Debian)"
+  ansible.builtin.shell:
+    cmd: grep "^{{ ansible_date_time.date }}*" /var/log/dpkg.log | grep "status installed"
+  register: notes
+
+- name: "Email notification of installed packages"
+  ansible.builtin.debug:
+    var: notes
+
+#- name: "Email notification of installed packages"
+#  mail:
+#    host: "{{ smtp_host }}"
+#    port: "{{ smtp_port }}"
+#    to: "{{ recipient }}"
+#    from: "{{ sender }}"
+#    subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
+#    body: "{{ notes.stdout }}"
+#    secure: never
+#  delegate_to: localhost
+#  when:
+#    - notes.stdout.find("-- No entries --") == -1
+#    - notes.stdout != ""
