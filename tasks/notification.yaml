@@ -41,5 +41,4 @@
   delegate_to: localhost
   when:
     - notes.failed is false
-    - notes.changed | bool
     #- notes.stdout.find("-- No entries --") == -1
