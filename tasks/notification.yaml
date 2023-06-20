@@ -42,3 +42,6 @@
   when:
     - notes.failed is false
     #- notes.stdout.find("-- No entries --") == -1
+
+- debug:
+    var: notes
