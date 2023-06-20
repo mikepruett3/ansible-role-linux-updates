@@ -22,7 +22,7 @@
     to: "{{ recipient }}"
     from: "{{ sender }}"
     subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
-    body: "{{ notes.stdout_lines }}"
+    body: "{{ notes.stdout }}"
     secure: never
   delegate_to: localhost
   when:
