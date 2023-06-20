@@ -1,6 +1,22 @@
 ---
 # Kernel tasks file for ansible-role-linux-updates
 
+- name: "Test if package_cleanup boolean variable is set correctly"
+  ansible.builtin.assert:
+    that:
+      - package_cleanup is defined
+      - package_cleanup is boolean
+    quiet: yes
+  when:
+    - ansible_facts['distribution_major_version'] <= '7'
+
+- name: "Install yum-utils package, if not already installed (RHEL7)"
+  ansible.builtin.yum:
+    name: "yum-utils"
+    state: present
+  when:
+    - not package_cleanup | bool
+    - ansible_facts['distribution_major_version'] <= '7'
 
 ## https://access.redhat.com/solutions/1227 ##
 - name: "Collect number of installed kernels"
