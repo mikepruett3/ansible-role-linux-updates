@@ -8,12 +8,26 @@
 - name: "Collect list of installed packages (Debian)"
   ansible.builtin.shell:
     #cmd: grep '^{{ ansible_date_time.date }}*' /var/log/dpkg.log | grep 'status installed'
-    cmd: grep '^{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-17*' /var/log/dpkg.log | grep 'status installed' | sort -t- -k2
+    cmd: grep '^{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-17*' /var/log/dpkg.log | grep 'status installed'
   register: notes
+  when:
+    - ansible_facts['os_family'] == 'Debian'
 
-#- name: "Email notification of installed packages"
-#  ansible.builtin.debug:
-#    var: notes
+- name: "Collect list of installed packages (RHEL7)"
+  ansible.builtin.shell:
+    cmd: yum history info
+  register: notes
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] <= '7'
+
+- name: "Collect list of installed packages (RHEL8)"
+  ansible.builtin.shell:
+    cmd: dnf history info
+  register: notes
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] >= '8'
 
 - name: "Email notification of installed packages"
   mail:
@@ -27,4 +41,5 @@
   delegate_to: localhost
   when:
     - notes.failed is false
-    - notes.stdout.find("-- No entries --") == -1
+    - notes.changed | bool
+    #- notes.stdout.find("-- No entries --") == -1
