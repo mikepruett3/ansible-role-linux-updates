@@ -20,4 +20,4 @@
   ansible.builtin.set_fact:
     package_cleanup: false
   when:
-    - result.failed | bool
+    - result.failed is true
