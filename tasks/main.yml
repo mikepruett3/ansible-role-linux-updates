@@ -63,7 +63,7 @@
     cmd: dpkg --configure -a
   register: patch_again
   when:
-    - debian.rc != 0
+    - debian.rc == 100
 
 - name: "Install latest updates (Debian - again)"
   ansible.builtin.apt:
