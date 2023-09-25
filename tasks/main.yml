@@ -56,22 +56,20 @@
     state: latest
   when: ansible_facts['os_family'] == 'Debian'
   ignore_errors: true
-  register: debian
+  #register: debian
 
 - name: "Check if patching failed (Debian)"
   ansible.builtin.shell:
     cmd: dpkg --configure -a
-  register: patch_again
-  when:
-    - debian.rc == 100
+  #register: patch_again
+  #when:
+  #  - debian.rc == 100
 
 - name: "Install latest updates (Debian - again)"
   ansible.builtin.apt:
     name: "*"
     state: latest
-  when:
-    - patch_again.changed
-    - ansible_facts['os_family'] == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
 
 - name: "Deploy kernel_check.sh script"
   ansible.builtin.template:
