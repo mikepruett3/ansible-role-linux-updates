@@ -26,50 +26,52 @@
     - '"yum-utils" not in ansible_facts.packages'
     - ansible_facts['os_family'] == 'RedHat'
 
-- name: "Install latest updates (RHEL7)"
+- name: "Install latest updates (yum)"
   ansible.builtin.yum:
     name: "*"
     state: latest
     update_cache: yes
   when:
-    - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] <= '7'
+    - ansible_facts['pkg_mgr'] == 'yum'
 
-- name: "Install latest updates (RHEL8)"
+- name: "Install latest updates (dnf)"
   ansible.builtin.dnf:
     name: "*"
     state: latest
     allowerasing: yes
     update_cache: yes
   when:
-    - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] >= '8'
+    - ansible_facts['pkg_mgr'] == 'dnf'
 
-- name: "Update Package List (Debian)"
+- name: "Update Package List (apt)"
   ansible.builtin.apt:
     update_cache: yes
-  when: ansible_facts['os_family'] == 'Debian'
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
 
-- name: "Install latest updates (Debian)"
+- name: "Install latest updates (apt)"
   ansible.builtin.apt:
     name: "*"
     state: latest
-  when: ansible_facts['os_family'] == 'Debian'
   ignore_errors: true
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
   #register: debian
 
-- name: "Check if patching failed (Debian)"
+- name: "Check if patching failed (apt)"
   ansible.builtin.shell:
     cmd: dpkg --configure -a
   #register: patch_again
-  #when:
-  #  - debian.rc == 100
+  when:
+    #- debian.rc == 100
+    - ansible_facts['pkg_mgr'] == 'apt'
 
-- name: "Install latest updates (Debian - again)"
+- name: "Install latest updates (apt - again)"
   ansible.builtin.apt:
     name: "*"
     state: latest
-  when: ansible_facts['os_family'] == 'Debian'
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
 
 - name: "Deploy kernel_check.sh script"
   ansible.builtin.template:
@@ -123,16 +125,19 @@
     - ansible_facts['os_family'] == 'RedHat'
     - ansible_facts['distribution_major_version'] >= '7'
 
-- name: "Remove useless packages from the cache (Debian)"
+- name: "Remove useless packages from the cache (apt)"
   ansible.builtin.apt:
     autoclean: yes
-  when: ansible_facts['os_family'] == 'Debian'
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
 
-- name: "Remove dependencies that are no longer required (Debian)"
+- name: "Remove dependencies that are no longer required (apt)"
   ansible.builtin.apt:
     autoremove: yes
-  when: ansible_facts['os_family'] == 'Debian'
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
 
-- name: "Cleanup Apt Cache (Debian)"
+- name: "Cleanup Apt Cache (apt)"
   ansible.builtin.shell: apt-get -y clean
-  when: ansible_facts['os_family'] == 'Debian'
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
