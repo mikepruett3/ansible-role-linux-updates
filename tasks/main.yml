@@ -36,6 +36,35 @@
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
+- name: "Collect list of packages to update (yum)"
+  ansible.builtin.shell:
+    cmd: yum check-update
+  register: output
+  when:
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Collect list of packages to update (dnf)"
+  ansible.builtin.shell:
+    cmd: dnf check-update
+  register: output
+  when:
+    - ansible_facts['pkg_mgr'] == 'dnf'
+
+- name: "Collect list of packages to update (apt)"
+  ansible.builtin.shell:
+    cmd: apt list --upgradable
+  register: output
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
+
+- name: "Set upgradable Fact"
+  ansible.builtin.set_fact:
+    updates: "{{ updates.stdout }}"
+  when:
+    - output is defined
+    - output.changed
+    - output.stdout != ""
+
 - name: "Install latest updates (yum)"
   ansible.builtin.yum:
     name: "*"
@@ -81,19 +110,21 @@
   shell: "{{ patching_journal }}"
   register: notes
 
-- name: "Email notification of installed packages"
+- name: "Email notification of installed packages (RedHat)"
   mail:
     host: "{{ smtp_host }}"
     port: "{{ smtp_port }}"
     to: "{{ recipient }}"
     from: "{{ sender }}"
     subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
-    body: "{{ notes.stdout }}"
+    body: "{{ updates }}"
     secure: never
   delegate_to: localhost
   when:
-    - notes.stdout.find("-- No entries --") == -1
-    - notes.stdout != ""
+    - updates is defined
+    #- updates is string
+    #- notes.stdout.find("-- No entries --") == -1
+    #- updates != ""
 
 #- name: "Collect number of installed kernels"
 #  shell: rpm -qa kernel | wc -l
