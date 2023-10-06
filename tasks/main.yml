@@ -137,9 +137,8 @@
     - ansible_facts['pkg_mgr'] == 'dnf'
 
 - name: "Clean Package Cache (apt)"
-  ansible.builtin.apt:
-    #autoclean: yes
-    clean: yes
+  ansible.builtin.shell:
+    cmd: apt-get -y clean all
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
