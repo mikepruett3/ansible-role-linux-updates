@@ -1,0 +1,124 @@
+---
+# RedHat tasks file for ansible-role-linux-updates
+
+- name: "Install yum-utils package, if not already installed"
+  ansible.builtin.package:
+    name: "yum-utils"
+    state: present
+
+- name: "Collect list of packages to update (yum)"
+  ansible.builtin.shell:
+    cmd: yum list updates
+  register: output
+  when:
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Set upgradable Fact (yum)"
+  ansible.builtin.set_fact:
+    updates: "{{ output.stdout }}"
+  when:
+    - output is defined
+    - output.changed
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Collect list of packages to update (dnf)"
+  ansible.builtin.shell:
+    #cmd: dnf list --updates
+    cmd: dnf check-update
+  register: output
+  when:
+    - ansible_facts['pkg_mgr'] == 'dnf'
+
+- name: "Set upgradable Fact (dnf)"
+  ansible.builtin.set_fact:
+    updates: "{{ output.stdout }}"
+  when:
+    - output is defined
+    - output.changed
+    - ansible_facts['pkg_mgr'] == 'dnf'
+
+- name: "Install latest updates (yum)"
+  ansible.builtin.yum:
+    name: "*"
+    state: latest
+    update_cache: yes
+  when:
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Install latest updates (dnf)"
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+    allowerasing: yes
+    update_cache: yes
+  when:
+    - ansible_facts['pkg_mgr'] == 'dnf'
+
+- name: "Deploy kernel_check.sh script"
+  ansible.builtin.template:
+    src: "kernel_check_redhat.j2"
+    dest: /usr/local/bin/kernel_check.sh
+    owner: root
+    group: root
+    mode: '0770'
+
+- name: "Check if reboot is required, after patching kernel"
+  ansible.builtin.command:
+    cmd: /usr/local/bin/kernel_check.sh
+  register: reboot
+
+- name: "Reboot host, if kernel update installed"
+  ansible.builtin.reboot:
+  when:
+    - reboot.stdout.find("reboot") != -1
+
+- name: "Email notification of installed packages"
+  mail:
+    host: "{{ smtp_host }}"
+    port: "{{ smtp_port }}"
+    to: "{{ recipient }}"
+    from: "{{ sender }}"
+    subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
+    body: "{{ updates }}"
+    secure: never
+  delegate_to: localhost
+  when:
+    - updates is defined
+    - updates is string
+
+- name: "Remove dependencies that are no longer required (yum)"
+  ansible.builtin.yum:
+    autoremove: yes
+  ignore_errors: yes
+  when:
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Remove dependencies that are no longer required (dnf)"
+  ansible.builtin.dnf:
+    autoremove: yes
+  ignore_errors: yes
+  when:
+    - ansible_facts['pkg_mgr'] == 'dnf'
+
+- name: "Clean Package Cache (yum)"
+  ansible.builtin.shell:
+    cmd: yum clean all
+  when:
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Clean Package Cache (dnf)"
+  ansible.builtin.shell:
+    cmd: dnf clean all
+  when:
+    - ansible_facts['pkg_mgr'] == 'dnf'
+
+#- name: "Collect number of installed kernels"
+#  shell: rpm -qa kernel | wc -l
+#  register: kernels
+
+#- name: "Remove old kernels after reboot (RHEL)"
+#  command: "{{ package_cleanup }}"
+#  ignore_errors: yes
+#  when:
+#    - kernels.stdout | int > 2
+#    - ansible_facts['os_family'] == 'RedHat'
