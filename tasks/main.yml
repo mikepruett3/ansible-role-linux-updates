@@ -1,17 +1,17 @@
 ---
 # tasks file for ansible-role-linux-updates
 
-- name: "Include OS-specific variables"
-  include_vars: "{{ lookup('first_found', params) }}"
-  vars:
-    params:
-      files:
-        - '{{ansible_distribution}}_{{ansible_distribution_major_version}}.yaml'
-        - '{{ansible_distribution}}.yaml'
-        - '{{ansible_os_family}}.yaml'
-        - default.yaml
-      paths:
-        - 'vars'
+#- name: "Include OS-specific variables"
+#  include_vars: "{{ lookup('first_found', params) }}"
+#  vars:
+#    params:
+#      files:
+#        - '{{ansible_distribution}}_{{ansible_distribution_major_version}}.yaml'
+#        - '{{ansible_distribution}}.yaml'
+#        - '{{ansible_os_family}}.yaml'
+#        - default.yaml
+#      paths:
+#        - 'vars'
 
 - name: "Install yum-utils package, if not already installed (RedHat)"
   ansible.builtin.package:
@@ -39,7 +39,6 @@
 - name: "Collect list of packages to update (yum)"
   ansible.builtin.shell:
     cmd: yum list updates
-  #ignore_errors: yes
   register: output
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
@@ -81,7 +80,6 @@
     - output is defined
     - output.changed
     - ansible_facts['pkg_mgr'] == 'apt'
-    #- output.stdout != ""
 
 - name: "Install latest updates (yum)"
   ansible.builtin.yum:
@@ -110,7 +108,8 @@
 
 - name: "Deploy kernel_check.sh script"
   ansible.builtin.template:
-    src: "{{ kernel_check_script }}"
+    #src: "{{ kernel_check_script }}"
+    src: "kernel_check_{{ ansible_os_family | lower }}.j2"
     dest: /usr/local/bin/kernel_check.sh
     owner: root
     group: root
@@ -122,7 +121,8 @@
 
 - name: "Reboot host, if kernel update installed"
   ansible.builtin.reboot:
-  when: reboot.stdout.find("reboot") != -1
+  when:
+    - reboot.stdout.find("reboot") != -1
 
 - name: "Email notification of installed packages (RedHat)"
   mail:
@@ -136,9 +136,7 @@
   delegate_to: localhost
   when:
     - updates is defined
-    #- updates is string
-    #- notes.stdout.find("-- No entries --") == -1
-    #- updates != ""
+    - updates is string
 
 #- name: "Collect number of installed kernels"
 #  shell: rpm -qa kernel | wc -l
@@ -186,8 +184,3 @@
     cmd: apt-get -y clean all
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
-
-#- name: "Cleanup Apt Cache (apt)"
-#  ansible.builtin.shell: apt-get -y clean
-#  when:
-#    - ansible_facts['pkg_mgr'] == 'apt'
