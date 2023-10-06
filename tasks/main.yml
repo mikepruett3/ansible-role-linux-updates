@@ -107,14 +107,25 @@
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
-- name: "Deploy kernel_check.sh script"
+- name: "Deploy kernel_check.sh script (RedHat)"
   ansible.builtin.template:
-    #src: "{{ kernel_check_script }}"
-    src: "kernel_check_{{ ansible_os_family | lower }}.j2"
+    src: "kernel_check_redhat.j2"
     dest: /usr/local/bin/kernel_check.sh
     owner: root
     group: root
     mode: '0770'
+  when:
+    - ansible_facts['os_family'] == "RedHat"
+
+- name: "Deploy kernel_check.sh script (Debian)"
+  ansible.builtin.template:
+    src: "kernel_check_debian.j2"
+    dest: /usr/local/bin/kernel_check.sh
+    owner: root
+    group: root
+    mode: '0770'
+  when:
+    - ansible_facts['os_family'] == 'Debian'
 
 - name: "Check if reboot is required, after patching kernel"
   ansible.builtin.command: /usr/local/bin/kernel_check.sh
