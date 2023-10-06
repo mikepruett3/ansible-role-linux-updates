@@ -178,7 +178,7 @@
 - name: "Clean Package Cache (dnf)"
   ansible.builtin.shell:
     cmd: dnf clean all
-  ignore_errors: yes
+  ignore_errors: true
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
 
