@@ -32,6 +32,7 @@
     path: /etc/needrestart/needrestart.conf
     regexp: "^#$nrconf{restart} = 'i';"
     line: "$nrconf{restart} = 'a';"
+    state: present
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
