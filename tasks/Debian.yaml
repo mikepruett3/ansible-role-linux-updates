@@ -53,6 +53,8 @@
   ansible.builtin.apt:
     autoremove: yes
   ignore_errors: yes
+  when:
+    - kernel_cleanup | bool
 
 - name: "Clean Package Cache"
   ansible.builtin.shell:

@@ -1,35 +1,44 @@
 ---
 # Kernel tasks file for ansible-role-linux-updates
 
-- name: "Test if package_cleanup boolean variable is set correctly"
-  ansible.builtin.assert:
-    that:
-      - package_cleanup is defined
-      - package_cleanup is boolean
-    quiet: yes
-  when:
-    - ansible_facts['distribution_major_version'] <= '7'
+#- name: "Test if package_cleanup boolean variable is set correctly"
+#  ansible.builtin.assert:
+#    that:
+#      - package_cleanup is defined
+#      - package_cleanup is boolean
+#    quiet: yes
+#  when:
+#    - ansible_facts['distribution_major_version'] <= '7'
 
-- name: "Install yum-utils package, if not already installed (RHEL7)"
+- name: "Install yum-utils package, if not already installed (yum)"
   ansible.builtin.yum:
     name: "yum-utils"
     state: present
   when:
-    - not package_cleanup | bool
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Remove yum-utils package, if installed where its not supposed to be (dnf)"
+  ansible.builtin.dnf:
+    name: "yum-utils"
+    state: absent
+  when:
+    - ansible_facts['pkg_mgr'] == 'dnf'
 
 ## https://access.redhat.com/solutions/1227 ##
-- name: "Collect number of installed kernels"
+- name: "Collect number of installed kernels (RedHat)"
   ansible.builtin.shell:
     cmd: rpm -qa kernel | wc -l
   register: kernels
+  when:
+    - ansible_facts['os_family'] == "RedHat"
 
-- name: "Remove old kernels (yum-utils)"
+- name: "Remove old kernels (yum)"
   ansible.builtin.shell:
     cmd: package-cleanup -y --oldkernels --count=2
-  ignore_errors: yes
+  #ignore_errors: yes
   when:
     - kernels.stdout | int > 2
-    - ansible_facts['distribution_major_version'] <= '7'
+    - ansible_facts['pkg_mgr'] == 'yum'
 
 - name: "Remove old kernels (dnf)"
   ansible.builtin.shell:
@@ -37,4 +46,4 @@
   ignore_errors: yes
   when:
     - kernels.stdout | int > 2
-    - ansible_facts['distribution_major_version'] >= '8'
+    - ansible_facts['pkg_mgr'] == 'dnf'

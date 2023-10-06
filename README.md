@@ -6,7 +6,7 @@ Ansible role to deploy system updates on Linux Servers.
 Requirements
 ------------
 
-The role does not require anyting to run on RHEL and its derivatives.
+The role does not require anything to run on Ubuntu, Debian or RHEL and its derivatives.
 
 Role Variables
 --------------
@@ -18,6 +18,8 @@ smtp_host: "smtp.example.org"
 smtp_port: 25
 sender: "myhost@example.org"
 recipient: "it@example.org"
+
+kernel_cleanup: true
 ```
 
 ```smtp_host``` **(Required)** The hostname of a local or remote SMTP server to use.
@@ -28,7 +30,9 @@ recipient: "it@example.org"
 
 ```recipient``` **(Required)** The email address to send the report to (i.e. **TO**).
 
-Role variables can be stored with the hosts.yaml file, or in the main variables file.
+```kernel_cleanup``` **(Required)** Wether or not to remove old kernels.
+
+Role variables can be stored with the ```hosts.yaml``` file, or in the main variables file.
 
 Dependencies
 ------------

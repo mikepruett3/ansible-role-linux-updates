@@ -1,13 +1,6 @@
 ---
 # RedHat tasks file for ansible-role-linux-updates
 
-- name: "Install yum-utils package, if not already installed (yum)"
-  ansible.builtin.package:
-    name: "yum-utils"
-    state: present
-  when:
-    - ansible_facts['pkg_mgr'] == 'yum'
-
 - name: "Collect list of packages to update (yum)"
   ansible.builtin.shell:
     cmd: yum list updates
@@ -80,6 +73,7 @@
   ignore_errors: yes
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
+    - kernel_cleanup | bool
 
 - name: "Remove dependencies that are no longer required (dnf)"
   ansible.builtin.dnf:
@@ -87,6 +81,7 @@
   ignore_errors: yes
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
+    - kernel_cleanup | bool
 
 - name: "Clean Package Cache (yum)"
   ansible.builtin.shell:

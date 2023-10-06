@@ -1,0 +1,24 @@
+---
+# Assert tasks file for ansible-role-linux-updates
+
+- name: "Test if SMTP information is set correctly"
+  ansible.builtin.assert:
+    that:
+      - smtp_host is defined
+      - smtp_host is string
+      - smtp_port is defined
+      - smtp_port is string
+      - sender is defined
+      - sender is string
+      - recipient is defined
+      - recipient is string
+    quiet: yes
+
+- name: "Test if Kernel Cleanup flag is set correctly"
+  ansible.builtin.assert:
+    that:
+      - kernel_cleanup is defined
+      - kernel_cleanup is boolean
+    quiet: yes
+  when:
+    - kernel_cleanup is defined
