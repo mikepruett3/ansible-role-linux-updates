@@ -38,15 +38,15 @@
 
 - name: "Collect list of packages to update (yum)"
   ansible.builtin.shell:
-    cmd: yum check-update
-  ignore_errors: yes
+    cmd: yum list updates
+  #ignore_errors: yes
   register: output
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
 
 - name: "Collect list of packages to update (dnf)"
   ansible.builtin.shell:
-    cmd: dnf check-update
+    cmd: dnf list --updates
   register: output
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
