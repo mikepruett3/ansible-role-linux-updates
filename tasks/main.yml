@@ -153,38 +153,38 @@
 - name: "Remove dependencies that are no longer required (yum)"
   ansible.builtin.yum:
     autoremove: yes
+  ignore_errors: yes
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
 
 - name: "Remove dependencies that are no longer required (dnf)"
   ansible.builtin.dnf:
     autoremove: yes
+  ignore_errors: yes
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
 
 - name: "Remove dependencies that are no longer required (apt)"
   ansible.builtin.apt:
     autoremove: yes
+  ignore_errors: yes
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
 - name: "Clean Package Cache (yum)"
   ansible.builtin.shell:
     cmd: yum clean all
-  ignore_errors: yes
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
 
 - name: "Clean Package Cache (dnf)"
   ansible.builtin.shell:
     cmd: dnf clean all
-  ignore_errors: true
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
 
 - name: "Clean Package Cache (apt)"
   ansible.builtin.shell:
     cmd: apt-get -y clean all
-  ignore_errors: yes
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
