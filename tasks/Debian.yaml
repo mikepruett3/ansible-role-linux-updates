@@ -49,20 +49,6 @@
   when:
     - reboot.stdout.find("reboot") != -1
 
-- name: "Email notification of installed packages"
-  mail:
-    host: "{{ smtp_host }}"
-    port: "{{ smtp_port }}"
-    to: "{{ recipient }}"
-    from: "{{ sender }}"
-    subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
-    body: "{{ updates }}"
-    secure: never
-  delegate_to: localhost
-  when:
-    - updates is defined
-    - updates is string
-
 - name: "Remove dependencies that are no longer required"
   ansible.builtin.apt:
     autoremove: yes

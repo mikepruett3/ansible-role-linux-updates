@@ -1,32 +1,6 @@
 ---
 # Notification tasks file for ansible-role-linux-updates
 
-- name: "Set facts for patch_log variable (Debian)"
-  ansible.builtin.set_fact:
-    #patch_log: grep '^{{ ansible_date_time.date }}*' /var/log/dpkg.log | grep 'status installed'
-    patch_log: grep '^{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-17*' /var/log/dpkg.log | grep 'status installed'
-  when:
-    - ansible_facts['os_family'] == 'Debian'
-
-- name: "Set facts for patch_log variable (RHEL7)"
-  ansible.builtin.set_fact:
-    patch_log: yum history info
-  when:
-    - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] <= '7'
-
-- name: "Set facts for patch_log variable (RHEL8)"
-  ansible.builtin.set_fact:
-    patch_log: dnf history info
-  when:
-    - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] >= '8'
-
-- name: "Collect list of installed packages"
-  ansible.builtin.shell:
-    cmd: "{{ patch_log }}"
-  register: notes
-
 - name: "Email notification of installed packages"
   mail:
     host: "{{ smtp_host }}"
@@ -34,10 +8,9 @@
     to: "{{ recipient }}"
     from: "{{ sender }}"
     subject: "Patching Report: {{ inventory_hostname }} has been successfully updated"
-    body: "{{ notes.stdout }}"
+    body: "{{ updates }}"
     secure: never
   delegate_to: localhost
   when:
-    - not notes.failed | bool
-    - notes.changed | bool
-    #- notes.stdout.find("-- No entries --") == -1
+    - updates is defined
+    - updates is string
