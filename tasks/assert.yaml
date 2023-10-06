@@ -7,7 +7,7 @@
       - smtp_host is defined
       - smtp_host is string
       - smtp_port is defined
-      - smtp_port is int
+      - smtp_port is number
       - sender is defined
       - sender is string
       - recipient is defined
