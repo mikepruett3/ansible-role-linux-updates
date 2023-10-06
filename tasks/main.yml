@@ -1,12 +1,14 @@
 ---
 # tasks file for ansible-role-linux-updates
 
-- ansible.builtin.include_tasks: Debian.yaml
-  when:
-    - ansible_facts['os_family'] == 'Debian'
+- ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yaml"
 
-- ansible.builtin.include_tasks: RedHat.yaml
-  when:
-    - ansible_facts['os_family'] == 'RedHat'
+#- ansible.builtin.include_tasks: Debian.yaml
+#  when:
+#    - ansible_facts['os_family'] == 'Debian'
+
+#- ansible.builtin.include_tasks: RedHat.yaml
+#  when:
+#    - ansible_facts['os_family'] == 'RedHat'
 
 - ansible.builtin.include_tasks: notification.yaml
