@@ -59,7 +59,7 @@
 
 - name: "Set upgradable Fact"
   ansible.builtin.set_fact:
-    updates: "{{ updates.stdout }}"
+    updates: "{{ output.stdout }}"
   when:
     - output is defined
     - output.changed
