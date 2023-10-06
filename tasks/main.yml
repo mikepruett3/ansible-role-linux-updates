@@ -13,18 +13,27 @@
       paths:
         - 'vars'
 
-- name: "Gather the package facts"
-  ansible.builtin.package_facts:
-    manager: auto
-  when: ansible_facts.packages is not defined
-
-- name: "Install yum-utils package, if not already installed"
+- name: "Install yum-utils package, if not already installed (RedHat)"
   ansible.builtin.package:
     name: "yum-utils"
     state: present
   when:
-    - '"yum-utils" not in ansible_facts.packages'
     - ansible_facts['os_family'] == 'RedHat'
+
+- name: "Install needrestart package, if not already installed (Debian)"
+  ansible.builtin.apt:
+    name: "needrestart"
+    state: present
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
+
+- name: "Modify needrestart.conf file (Debian)"
+  ansible.builtin.lineinfile:
+    path: /etc/needrestart/needrestart.conf
+    regexp: "^#$nrconf{restart} = 'i';"
+    line: "$nrconf{restart} = 'a';"
+  when:
+    - ansible_facts['pkg_mgr'] == 'apt'
 
 - name: "Install latest updates (yum)"
   ansible.builtin.yum:
@@ -43,33 +52,11 @@
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
 
-- name: "Update Package List (apt)"
-  ansible.builtin.apt:
-    update_cache: yes
-  when:
-    - ansible_facts['pkg_mgr'] == 'apt'
-
 - name: "Install latest updates (apt)"
   ansible.builtin.apt:
     name: "*"
     state: latest
-  ignore_errors: true
-  when:
-    - ansible_facts['pkg_mgr'] == 'apt'
-  #register: debian
-
-- name: "Check if patching failed (apt)"
-  ansible.builtin.shell:
-    cmd: dpkg --configure -a
-  #register: patch_again
-  when:
-    #- debian.rc == 100
-    - ansible_facts['pkg_mgr'] == 'apt'
-
-- name: "Install latest updates (apt - again)"
-  ansible.builtin.apt:
-    name: "*"
-    state: latest
+    update_cache: yes
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
@@ -118,18 +105,17 @@
 #    - kernels.stdout | int > 2
 #    - ansible_facts['os_family'] == 'RedHat'
 
-- name: "Cleanup (autoremove) old packages"
-  ansible.builtin.package:
+- name: "Remove dependencies that are no longer required (yum)"
+  ansible.builtin.yum:
     autoremove: yes
   when:
-    - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] >= '7'
+    - ansible_facts['pkg_mgr'] == 'yum'
 
-- name: "Remove useless packages from the cache (apt)"
-  ansible.builtin.apt:
-    autoclean: yes
+- name: "Remove dependencies that are no longer required (yum)"
+  ansible.builtin.dnf:
+    autoremove: yes
   when:
-    - ansible_facts['pkg_mgr'] == 'apt'
+    - ansible_facts['pkg_mgr'] == 'dnf'
 
 - name: "Remove dependencies that are no longer required (apt)"
   ansible.builtin.apt:
@@ -137,7 +123,26 @@
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
-- name: "Cleanup Apt Cache (apt)"
-  ansible.builtin.shell: apt-get -y clean
+- name: "Clean Package Cache (yum)"
+  ansible.builtin.shell:
+    cmd: yum clean all
+  when:
+    - ansible_facts['pkg_mgr'] == 'yum'
+
+- name: "Clean Package Cache (dnf)"
+  ansible.builtin.shell:
+    cmd: dnf clean all
+  when:
+    - ansible_facts['pkg_mgr'] == 'dnf'
+
+- name: "Clean Package Cache (apt)"
+  ansible.builtin.apt:
+    #autoclean: yes
+    clean: yes
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
+
+#- name: "Cleanup Apt Cache (apt)"
+#  ansible.builtin.shell: apt-get -y clean
+#  when:
+#    - ansible_facts['pkg_mgr'] == 'apt'
