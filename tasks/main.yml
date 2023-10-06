@@ -30,7 +30,7 @@
 - name: "Modify needrestart.conf file (Debian)"
   ansible.builtin.lineinfile:
     path: /etc/needrestart/needrestart.conf
-    regexp: "^#$nrconf{restart}"
+    regexp: "#$nrconf{restart} = 'i';"
     line: "$nrconf{restart} = 'a';"
     state: present
   when:
