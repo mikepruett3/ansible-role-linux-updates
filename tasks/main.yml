@@ -124,7 +124,7 @@
   when:
     - reboot.stdout.find("reboot") != -1
 
-- name: "Email notification of installed packages (RedHat)"
+- name: "Email notification of installed packages"
   mail:
     host: "{{ smtp_host }}"
     port: "{{ smtp_port }}"
@@ -137,17 +137,6 @@
   when:
     - updates is defined
     - updates is string
-
-#- name: "Collect number of installed kernels"
-#  shell: rpm -qa kernel | wc -l
-#  register: kernels
-
-#- name: "Remove old kernels after reboot (RHEL)"
-#  command: "{{ package_cleanup }}"
-#  ignore_errors: yes
-#  when:
-#    - kernels.stdout | int > 2
-#    - ansible_facts['os_family'] == 'RedHat'
 
 - name: "Remove dependencies that are no longer required (yum)"
   ansible.builtin.yum:
