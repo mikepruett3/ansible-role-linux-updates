@@ -1,10 +1,12 @@
 ---
 # RedHat tasks file for ansible-role-linux-updates
 
-- name: "Install yum-utils package, if not already installed"
+- name: "Install yum-utils package, if not already installed (yum)"
   ansible.builtin.package:
     name: "yum-utils"
     state: present
+  when:
+    - ansible_facts['pkg_mgr'] == 'yum'
 
 - name: "Collect list of packages to update (yum)"
   ansible.builtin.shell:
