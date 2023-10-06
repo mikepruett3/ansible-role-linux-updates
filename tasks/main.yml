@@ -124,10 +124,6 @@
   ansible.builtin.reboot:
   when: reboot.stdout.find("reboot") != -1
 
-#- name: "Collect list of installed packages"
-#  shell: "{{ patching_journal }}"
-#  register: notes
-
 - name: "Email notification of installed packages (RedHat)"
   mail:
     host: "{{ smtp_host }}"
