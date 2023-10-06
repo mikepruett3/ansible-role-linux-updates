@@ -1,18 +1,6 @@
 ---
 # tasks file for ansible-role-linux-updates
 
-#- name: "Include OS-specific variables"
-#  include_vars: "{{ lookup('first_found', params) }}"
-#  vars:
-#    params:
-#      files:
-#        - '{{ansible_distribution}}_{{ansible_distribution_major_version}}.yaml'
-#        - '{{ansible_distribution}}.yaml'
-#        - '{{ansible_os_family}}.yaml'
-#        - default.yaml
-#      paths:
-#        - 'vars'
-
 - name: "Install yum-utils package, if not already installed (RedHat)"
   ansible.builtin.package:
     name: "yum-utils"
