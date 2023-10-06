@@ -39,6 +39,7 @@
 - name: "Collect list of packages to update (yum)"
   ansible.builtin.shell:
     cmd: yum check-update
+  ignore_errors: yes
   register: output
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
