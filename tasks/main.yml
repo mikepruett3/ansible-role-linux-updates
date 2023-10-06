@@ -28,10 +28,11 @@
     - ansible_facts['pkg_mgr'] == 'apt'
 
 - name: "Modify needrestart.conf file (Debian)"
-  ansible.builtin.replace:
+  ansible.builtin.lineinfile:
     path: /etc/needrestart/needrestart.conf
-    regexp: "^#$nrconf{restart} = 'i';"
-    replace: "$nrconf{restart} = 'a';"
+    regexp: "^#$nrconf{restart}"
+    line: "$nrconf{restart} = 'a';"
+    state: present
   when:
     - ansible_facts['pkg_mgr'] == 'apt'
 
