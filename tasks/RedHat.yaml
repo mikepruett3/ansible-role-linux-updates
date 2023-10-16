@@ -18,8 +18,8 @@
 
 - name: "Collect list of packages to update (dnf)"
   ansible.builtin.shell:
-    #cmd: dnf list --updates
-    cmd: dnf check-update
+    cmd: dnf list --updates
+    #cmd: dnf check-update
   register: output
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
