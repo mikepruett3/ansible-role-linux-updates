@@ -57,7 +57,7 @@
   register: release
   #ignore_errors: true
   failed_when:
-    - release.rc == 0 or release.rc >= 2
+    - release.rc >= 2
   when:
     - ansible_facts['distribution'] == 'Ubuntu'
 
