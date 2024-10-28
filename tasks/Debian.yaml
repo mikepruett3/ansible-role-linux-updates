@@ -13,6 +13,14 @@
     line: "$nrconf{restart} = 'a';"
     state: present
 
+- name: "Deploy 01-dpkg_options configuration file"
+  ansible.builtin.template:
+    src: "dpkg-options.j2"
+    dest: /etc/apt/apt.conf.d/01-dpkg-option
+    owner: root
+    group: root
+    mode: '0640'
+
 - name: "Collect list of packages to update"
   ansible.builtin.shell:
     cmd: apt list --upgradable
