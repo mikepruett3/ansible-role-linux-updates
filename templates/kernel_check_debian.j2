@@ -6,6 +6,8 @@ CURRENT_KERNEL=$(uname -r)
 
 if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then
     echo 'reboot'
+    exit 1
 else
     echo 'no'
+    exit 0
 fi

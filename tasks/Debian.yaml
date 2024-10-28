@@ -51,6 +51,21 @@
   ansible.builtin.apt:
     upgrade: dist
 
+- name: "Check if there is a new Release (Ubuntu)"
+  ansible.builtin.shell:
+    cmd: do-release-upgrade -c
+  register: release
+  when:
+    - ansible_facts['distribution'] == 'Ubuntu'
+
+- name: "Perform a Release upgrade (Ubuntu)"
+  ansible.builtin.shell:
+    cmd: do-release-upgrade -f DistUpgradeViewNonInteractive
+  when:
+    - release is defined
+    - release.rc == 0
+    - ansible_facts['distribution'] == 'Ubuntu'
+
 - name: "Deploy kernel_check.sh script"
   ansible.builtin.template:
     src: "kernel_check_debian.j2"
@@ -60,25 +75,15 @@
     mode: '0770'
 
 - name: "Check if reboot is required, after patching kernel"
-  ansible.builtin.command:
+  ansible.builtin.shell:
     cmd: /usr/local/bin/kernel_check.sh
   register: reboot
 
 - name: "Reboot host, if kernel update installed"
   ansible.builtin.reboot:
   when:
-    - reboot.stdout.find("reboot") != -1
-
-#- name: "Remove dependencies that are no longer required"
-#  ansible.builtin.apt:
-#    autoremove: yes
-#  ignore_errors: yes
-#  when:
-#    - kernel_cleanup | bool
-
-#- name: "Clean Package Cache"
-#  ansible.builtin.shell:
-#    cmd: apt-get -y clean all
+    - reboot is defined
+    - reboot.rc != 0
 
 - name: "Remove dependencies that are no longer required"
   ansible.builtin.apt:
