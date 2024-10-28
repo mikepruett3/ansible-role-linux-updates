@@ -25,11 +25,23 @@
     - output is defined
     - output.changed
 
+- name: "Update Package Cache"
+  ansible.builtin.apt:
+      update_cache: yes
+
 - name: "Install latest updates"
   ansible.builtin.apt:
     name: "*"
     state: latest
-    update_cache: yes
+    dpkg_options: 'force-confold,force-confdef'
+
+- name: "Perform a Full upgrade"
+  ansible.builtin.apt:
+    upgrade: full
+
+- name: "Perform a Dist upgrade"
+  ansible.builtin.apt:
+    upgrade: dist
 
 - name: "Deploy kernel_check.sh script"
   ansible.builtin.template:
@@ -49,13 +61,22 @@
   when:
     - reboot.stdout.find("reboot") != -1
 
+#- name: "Remove dependencies that are no longer required"
+#  ansible.builtin.apt:
+#    autoremove: yes
+#  ignore_errors: yes
+#  when:
+#    - kernel_cleanup | bool
+
+#- name: "Clean Package Cache"
+#  ansible.builtin.shell:
+#    cmd: apt-get -y clean all
+
 - name: "Remove dependencies that are no longer required"
   ansible.builtin.apt:
     autoremove: yes
-  ignore_errors: yes
-  when:
-    - kernel_cleanup | bool
+    purge: true
 
 - name: "Clean Package Cache"
-  ansible.builtin.shell:
-    cmd: apt-get -y clean all
+  ansible.builtin.apt:
+    autoclean: yes
