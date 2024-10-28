@@ -55,6 +55,7 @@
   ansible.builtin.shell:
     cmd: do-release-upgrade -c
   register: release
+  ignore_errors: true
   when:
     - ansible_facts['distribution'] == 'Ubuntu'
 
