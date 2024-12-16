@@ -46,10 +46,12 @@
 - name: "Perform a Full upgrade"
   ansible.builtin.apt:
     upgrade: full
+  register: full_upgrade
 
 - name: "Perform a Dist upgrade"
   ansible.builtin.apt:
     upgrade: dist
+  register: dist_upgrade
 
 - name: "Check if there is a new Release (Ubuntu)"
   ansible.builtin.shell:
@@ -59,6 +61,8 @@
   failed_when:
     - release.rc >= 2
   when:
+    - full_upgrade.changed == false
+    - dist_upgrade.changed == false
     - ansible_facts['distribution'] == 'Ubuntu'
 
 - name: "Perform a Release upgrade (Ubuntu)"
