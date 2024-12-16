@@ -95,7 +95,7 @@
     cmd: /usr/local/bin/kernel_check.sh
   register: reboot
   failed_when:
-    - release.rc >= 2
+    - reboot.rc >= 2
 
 - name: "Reboot host, if kernel update installed"
   ansible.builtin.reboot:
