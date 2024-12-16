@@ -57,10 +57,10 @@
 - name: "Check if there is a new Release (Ubuntu)"
   ansible.builtin.shell:
     cmd: do-release-upgrade -c
-  register: release
+  register: release_check
   #ignore_errors: true
   failed_when:
-    - release.rc >= 2
+    - release_check.rc >= 2
   when:
     - regular_upgrade.changed == false
     - full_upgrade.changed == false
@@ -71,7 +71,9 @@
   ansible.builtin.set_fact:
     release: true
   when:
-    - release is defined AND release.rc == 0
+    - release_check exists
+    - release_check is defined
+    - release_check.rc == 0
     - regular_upgrade.changed == false
     - full_upgrade.changed == false
     - dist_upgrade.changed == false
@@ -82,7 +84,9 @@
     cmd: do-release-upgrade -f DistUpgradeViewNonInteractive
   ignore_errors: true
   when:
-    - release is defined AND release | bool
+    - release exists
+    - release is defined
+    - release | bool
     - regular_upgrade.changed == false
     - full_upgrade.changed == false
     - dist_upgrade.changed == false
