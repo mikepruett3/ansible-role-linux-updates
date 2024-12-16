@@ -77,6 +77,7 @@
 - name: "Perform a Release upgrade (Ubuntu)"
   ansible.builtin.shell:
     cmd: do-release-upgrade -f DistUpgradeViewNonInteractive
+  ignore_errors: true
   when:
     - release | bool
     - ansible_facts['distribution'] == 'Ubuntu'
