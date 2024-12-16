@@ -72,7 +72,7 @@
     cmd: do-release-upgrade -f DistUpgradeViewNonInteractive
   when:
     - release is defined
-    #- release.rc == 0
+    - release.rc == 0
     - ansible_facts['distribution'] == 'Ubuntu'
 
 - name: "Deploy kernel_check.sh script"
