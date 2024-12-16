@@ -74,13 +74,6 @@
     - release.rc == 0
     - ansible_facts['distribution'] == 'Ubuntu'
 
-- name: "Set fact for release (false)"
-  ansible.builtin.set_fact:
-    release: false
-  when:
-    - release.rc != 0
-    - ansible_facts['distribution'] == 'Ubuntu'
-
 - name: "Perform a Release upgrade (Ubuntu)"
   ansible.builtin.shell:
     cmd: do-release-upgrade -f DistUpgradeViewNonInteractive
