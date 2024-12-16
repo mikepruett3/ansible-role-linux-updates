@@ -71,7 +71,6 @@
   ansible.builtin.set_fact:
     release: true
   when:
-    - release_check exists
     - release_check is defined
     - release_check.rc == 0
     - regular_upgrade.changed == false
@@ -84,7 +83,6 @@
     cmd: do-release-upgrade -f DistUpgradeViewNonInteractive
   ignore_errors: true
   when:
-    - release exists
     - release is defined
     - release | bool
     - regular_upgrade.changed == false
