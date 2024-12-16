@@ -58,9 +58,9 @@
   ansible.builtin.shell:
     cmd: do-release-upgrade -c
   register: release_check
-  #ignore_errors: true
-  failed_when:
-    - release_check.rc >= 2
+  ignore_errors: true
+  #failed_when:
+  #  - release_check.rc >= 2
   when:
     - regular_upgrade.changed == false
     - full_upgrade.changed == false
