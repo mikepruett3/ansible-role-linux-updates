@@ -72,6 +72,9 @@
     release: true
   when:
     - release.rc == 0
+    - regular_upgrade.changed == false
+    - full_upgrade.changed == false
+    - dist_upgrade.changed == false
     - ansible_facts['distribution'] == 'Ubuntu'
 
 - name: "Perform a Release upgrade (Ubuntu)"
@@ -80,6 +83,9 @@
   ignore_errors: true
   when:
     - release | bool
+    - regular_upgrade.changed == false
+    - full_upgrade.changed == false
+    - dist_upgrade.changed == false
     - ansible_facts['distribution'] == 'Ubuntu'
 
 - name: "Deploy kernel_check.sh script"
