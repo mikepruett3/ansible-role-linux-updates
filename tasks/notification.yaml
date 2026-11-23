@@ -14,3 +14,4 @@
   when:
     - updates is defined
     - updates is string
+    - updates | trim | length > 0

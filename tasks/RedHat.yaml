@@ -5,6 +5,7 @@
   ansible.builtin.shell:
     cmd: yum list updates
   register: output
+  changed_when: false
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
 
@@ -21,6 +22,7 @@
     cmd: dnf list --updates
     #cmd: dnf check-update
   register: output
+  changed_when: false
   when:
     - ansible_facts['pkg_mgr'] == 'dnf'
 
@@ -41,6 +43,12 @@
     - ansible_facts['pkg_mgr'] == 'yum'
 
 - name: "Install latest updates (dnf)"
+  # allowerasing: without it, dnf refuses to proceed past a package
+  # conflict instead of erasing the conflicting package to resolve it, which
+  # previously left hosts with an incomplete/broken patch run and old
+  # packages never cleaned up, filling the / volume over time. Keep this
+  # even though it risks dnf erasing something unexpected mid-upgrade,
+  # removing it reintroduces the original problem.
   ansible.builtin.dnf:
     name: "*"
     state: latest

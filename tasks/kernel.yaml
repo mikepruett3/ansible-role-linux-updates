@@ -17,7 +17,7 @@
   when:
     - ansible_facts['pkg_mgr'] == 'yum'
 
-- name: "Remove yum-utils package, if installed where its not supposed to be (dnf)"
+- name: "Ensure yum-utils is absent (dnf doesn't need it, it's a yum-specific package)"
   ansible.builtin.dnf:
     name: "yum-utils"
     state: absent

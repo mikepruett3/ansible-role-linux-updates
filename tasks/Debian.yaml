@@ -25,6 +25,7 @@
   ansible.builtin.shell:
     cmd: apt list --upgradable
   register: output
+  changed_when: false
 
 - name: "Set upgradable Fact"
   ansible.builtin.set_fact:
